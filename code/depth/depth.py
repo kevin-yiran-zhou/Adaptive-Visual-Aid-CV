@@ -1,0 +1,59 @@
+import os
+import cv2
+import matplotlib.pyplot as plt
+from PIL import Image
+from transformers import AutoProcessor, AutoModelForDepthEstimation
+import torch
+import numpy as np
+
+# Load model and processor
+# Model	                  HuggingFace ID	            Notes
+# DPT-Large	              Intel/dpt-large	            Best accuracy, heaviest (~439M params)
+# DPT-Hybrid	          Intel/dpt-hybrid-midas	    Great balance
+# DPT-SwinV2-Tiny-256	  Intel/dpt-swinv2-tiny-256	    Lightweight, optimized for speed
+# DPT-SwinV2-Tiny-384	  Intel/dpt-swinv2-tiny-384	    Better quality than 256, still fast
+# LeReS	                  nielsr/dpt-depth-estimation	Good accuracy, slower
+# ZoeDepth	              isl-org/ZoeDepth	            Newer, high-accuracy, works well in indoor/outdoor
+# Depth Anything (ViT-S)  Intel/dpt-vit-s-midas	        Tiny transformer, good for fast inference
+# "LiheYoung/Depth-Anything-V2-base"
+# "LiheYoung/Depth-Anything-V2-large"
+
+
+model_name = "LiheYoung/Depth-Anything-V2-base"
+processor = AutoProcessor.from_pretrained(model_name)
+model = AutoModelForDepthEstimation.from_pretrained(model_name)
+model.eval()
+
+# Path to your images
+image_dir = "/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images"
+image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(".jpeg")]
+
+for file_name in image_files:
+    img_path = os.path.join(image_dir, file_name)
+    image = Image.open(img_path).convert("RGB")
+    orig_width, orig_height = image.size
+
+    # Process image
+    inputs = processor(images=image, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs)
+        depth = outputs.predicted_depth[0].squeeze().cpu().numpy()
+
+    # Normalize and resize depth map
+    depth_vis = (depth - depth.min()) / (depth.max() - depth.min())
+    depth_vis_resized = cv2.resize(depth_vis, (orig_width, orig_height))
+
+    # Plot side-by-side
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.imshow(image)
+    plt.title(f"Original - {file_name}")
+    plt.axis("off")
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(depth_vis_resized, cmap="plasma")
+    plt.title("Estimated Depth (Resized)")
+    plt.axis("off")
+
+    plt.tight_layout()
+    plt.show()

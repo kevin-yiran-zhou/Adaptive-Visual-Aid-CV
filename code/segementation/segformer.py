@@ -11,22 +11,21 @@ device = torch.device("cpu")
 print("Using device:", device)
 
 # ----- Load Hugging Face SegFormer Model -----
-# B5: 1.1s per image, mIoU 49.3 => too slow
-# feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
-# model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640").to(device)
+# B5: mIoU 49.3 => too slow
+# model_name = "nvidia/segformer-b5-finetuned-ade-640-640"
+# B4: 
+# model_name = "nvidia/segformer-b4-finetuned-ade-512-512"
+# B3: 
+# model_name = "nvidia/segformer-b3-finetuned-ade-512-512"
+# B2: mIoU 44.0
+model_name = "nvidia/segformer-b2-finetuned-ade-512-512"
+# B1: mIoU 39.7 => accuracy not good
+# model_name = "nvidia/segformer-b1-finetuned-ade-512-512"
+# B0: mIoU 37.4 => accuracy too bad
+# model_name = "nvidia/segformer-b0-finetuned-ade-512-512"
 
-# B2: 0.51s per image, mIoU 44.0
-feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b2-finetuned-ade-512-512")
-model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b2-finetuned-ade-512-512").to(device)
-
-# B1: 0.23s per image, mIoU 39.7 => accuracy not good
-# feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b1-finetuned-ade-512-512")
-# model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b1-finetuned-ade-512-512").to(device)
-
-# B0: 0.19s per image, mIoU 37.4 => accuracy too bad
-# feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")
-# model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512").to(device)
-
+feature_extractor = SegformerFeatureExtractor.from_pretrained(model_name)
+model = SegformerForSemanticSegmentation.from_pretrained(model_name).to(device)
 model.eval()
 
 # ----- ADE20K label map and color map -----
@@ -89,7 +88,7 @@ def draw_legend(segmap):
     plt.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc='upper left')
 
 # ----- Inference on all JPEG images in ./images -----
-image_files = sorted(glob.glob("images/*.jpeg"))
+image_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
 
 for img_path in image_files:
     print(f"Processing {img_path}...")

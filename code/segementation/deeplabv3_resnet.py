@@ -63,7 +63,7 @@ def draw_legend(segmap):
     plt.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc='upper left')
 
 # ----- Inference on all PNG images -----
-image_files = sorted(glob.glob("images/*.jpeg"))
+image_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
 
 for img_path in image_files:
     print(f"Processing {img_path}...")
