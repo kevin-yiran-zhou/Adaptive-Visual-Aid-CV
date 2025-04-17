@@ -16,9 +16,6 @@ import numpy as np
 # DPT-SwinV2-Tiny-384	  Intel/dpt-swinv2-tiny-384	    Better quality than 256, still fast
 # LeReS	                  nielsr/dpt-depth-estimation	Good accuracy, slower
 # ZoeDepth	              isl-org/ZoeDepth	            Newer, high-accuracy, works well in indoor/outdoor
-# Depth Anything (ViT-S)  Intel/dpt-vit-s-midas	        Tiny transformer, good for fast inference
-# "LiheYoung/Depth-Anything-V2-base"
-# "LiheYoung/Depth-Anything-V2-large"
 
 
 model_name = "Intel/dpt-large"
@@ -27,7 +24,7 @@ model = AutoModelForDepthEstimation.from_pretrained(model_name)
 model.eval()
 
 # Path to your images
-image_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
+image_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.png"))
 
 for img_path in image_files:
     print(f"Processing {img_path}...")
