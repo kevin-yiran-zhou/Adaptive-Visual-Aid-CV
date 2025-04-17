@@ -1,4 +1,6 @@
 import os
+import glob
+import time
 import cv2
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -19,17 +21,17 @@ import numpy as np
 # "LiheYoung/Depth-Anything-V2-large"
 
 
-model_name = "LiheYoung/Depth-Anything-V2-base"
+model_name = "Intel/dpt-large"
 processor = AutoProcessor.from_pretrained(model_name)
 model = AutoModelForDepthEstimation.from_pretrained(model_name)
 model.eval()
 
 # Path to your images
-image_dir = "/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images"
-image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(".jpeg")]
+image_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
 
-for file_name in image_files:
-    img_path = os.path.join(image_dir, file_name)
+for img_path in image_files:
+    print(f"Processing {img_path}...")
+    start_time = time.time()
     image = Image.open(img_path).convert("RGB")
     orig_width, orig_height = image.size
 
@@ -43,11 +45,13 @@ for file_name in image_files:
     depth_vis = (depth - depth.min()) / (depth.max() - depth.min())
     depth_vis_resized = cv2.resize(depth_vis, (orig_width, orig_height))
 
+    inference_time = time.time() - start_time
+    print(f"Inference time: {inference_time:.2f}s | FPS: {1/inference_time:.2f}")
     # Plot side-by-side
     plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)
     plt.imshow(image)
-    plt.title(f"Original - {file_name}")
+    plt.title(f"Original")
     plt.axis("off")
 
     plt.subplot(1, 2, 2)
