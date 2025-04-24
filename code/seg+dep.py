@@ -12,8 +12,8 @@ from transformers import (
     pipeline
 )
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = torch.device("cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 print("Using device:", device)
 
 # DPT model: https://arxiv.org/abs/1907.01341v3
@@ -32,7 +32,7 @@ depth_anything_pipe = pipeline("depth-estimation", model=depth_anything_model_na
 
 # SegFormer: https://arxiv.org/abs/2105.15203 
 # "nvidia/segformer-b5-finetuned-ade-640-640"   "nvidia/segformer-b2-finetuned-ade-512-512"     "nvidia/segformer-b1-finetuned-ade-512-512"     "nvidia/segformer-b0-finetuned-ade-512-512"
-seg_model_name = "nvidia/segformer-b2-finetuned-ade-512-512"
+seg_model_name = "nvidia/segformer-b1-finetuned-ade-512-512"
 seg_extractor = SegformerFeatureExtractor.from_pretrained(seg_model_name)
 seg_model = SegformerForSemanticSegmentation.from_pretrained(seg_model_name).to(device)
 seg_model.eval()
@@ -95,10 +95,12 @@ def draw_segmentation_legend(ax, segmap):
     ax.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
 png_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.png"))
+PNG_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.PNG"))
 jpeg_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
-image_files = png_files + jpeg_files
+# image_files = PNG_files + png_files + jpeg_files
+image_files = PNG_files
 
-for img_path in png_files:
+for img_path in image_files:
     print(f"\nProcessing {img_path}...")
     image = ImageOps.exif_transpose(Image.open(img_path).convert("RGB"))
     orig_width, orig_height = image.size
@@ -108,7 +110,7 @@ for img_path in png_files:
     image = image.resize(new_size, Image.BILINEAR)
     print(f"Resized resolution: {image.size[0]} x {image.size[1]}")
 
-    # === Segmentation ===
+    # === Segformer ===
     t1 = time.time()
     seg_inputs = seg_extractor(images=image, return_tensors="pt").to(device)
     with torch.no_grad():
@@ -117,16 +119,16 @@ for img_path in png_files:
     seg_time = time.time() - t1
     print(f"Segmentation time: {seg_time:.2f}s")
 
-    # === DPT Depth ===
-    t2 = time.time()
-    dpt_inputs = dpt_processor(images=image, return_tensors="pt").to(device)
-    with torch.no_grad():
-        dpt_outputs = dpt_model(**dpt_inputs)
-        dpt_depth = dpt_outputs.predicted_depth[0].squeeze().cpu().numpy()
-    dpt_time = time.time() - t2
-    print(f"DPT depth time: {dpt_time:.2f}s")
-    dpt_depth_vis = (dpt_depth - dpt_depth.min()) / (dpt_depth.max() - dpt_depth.min())
-    dpt_depth_resized = cv2.resize(dpt_depth_vis, (orig_width, orig_height))
+    # # === DPT Depth ===
+    # t2 = time.time()
+    # dpt_inputs = dpt_processor(images=image, return_tensors="pt").to(device)
+    # with torch.no_grad():
+    #     dpt_outputs = dpt_model(**dpt_inputs)
+    #     dpt_depth = dpt_outputs.predicted_depth[0].squeeze().cpu().numpy()
+    # dpt_time = time.time() - t2
+    # print(f"DPT depth time: {dpt_time:.2f}s")
+    # dpt_depth_vis = (dpt_depth - dpt_depth.min()) / (dpt_depth.max() - dpt_depth.min())
+    # dpt_depth_resized = cv2.resize(dpt_depth_vis, (orig_width, orig_height))
 
     # === Depth Anything ===
     t3 = time.time()
@@ -139,7 +141,7 @@ for img_path in png_files:
 
     # === Plotting ===
     overlay_img = overlay_segmentation(image, seg_pred)
-    fig, axs = plt.subplots(1, 4, figsize=(24, 6))
+    fig, axs = plt.subplots(1, 3, figsize=(24, 6))
 
     axs[0].imshow(image)
     axs[0].set_title("Original")
@@ -150,15 +152,15 @@ for img_path in png_files:
     axs[1].axis("off")
     draw_segmentation_legend(axs[1], seg_pred)
 
-    im1 = axs[2].imshow(dpt_depth_resized, cmap="plasma")
-    axs[2].set_title("DPT Depth")
-    axs[2].axis("off")
-    plt.colorbar(im1, ax=axs[2], fraction=0.046, pad=0.04)
+    # im1 = axs[2].imshow(dpt_depth_resized, cmap="plasma")
+    # axs[2].set_title("DPT Depth")
+    # axs[2].axis("off")
+    # plt.colorbar(im1, ax=axs[2], fraction=0.046, pad=0.04)
 
-    im2 = axs[3].imshow(depth_anything_resized, cmap="plasma")
-    axs[3].set_title("Depth Anything")
-    axs[3].axis("off")
-    plt.colorbar(im2, ax=axs[3], fraction=0.046, pad=0.04)
+    im2 = axs[2].imshow(depth_anything_resized, cmap="plasma")
+    axs[2].set_title("Depth Anything")
+    axs[2].axis("off")
+    plt.colorbar(im2, ax=axs[2], fraction=0.046, pad=0.04)
 
     plt.tight_layout()
     plt.show()
