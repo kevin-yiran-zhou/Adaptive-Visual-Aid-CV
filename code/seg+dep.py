@@ -16,12 +16,20 @@ from transformers import (
 device = torch.device("cpu")
 print("Using device:", device)
 
-# DPT model: https://arxiv.org/abs/1907.01341v3
-# "Intel/dpt-large"   "Intel/dpt-hybrid-midas"   "Intel/dpt-swinv2-tiny-256"
-dpt_model_name = "Intel/dpt-hybrid-midas"
-dpt_processor = AutoProcessor.from_pretrained(dpt_model_name)
-dpt_model = AutoModelForDepthEstimation.from_pretrained(dpt_model_name).to(device)
-dpt_model.eval()
+# SegFormer: https://arxiv.org/abs/2105.15203 
+# "nvidia/segformer-b5-finetuned-ade-640-640"   "nvidia/segformer-b2-finetuned-ade-512-512"     "nvidia/segformer-b1-finetuned-ade-512-512"     "nvidia/segformer-b0-finetuned-ade-512-512"
+seg_model_name = "nvidia/segformer-b5-finetuned-ade-640-640"
+seg_extractor = SegformerFeatureExtractor.from_pretrained(seg_model_name)
+seg_model = SegformerForSemanticSegmentation.from_pretrained(seg_model_name).to(device)
+seg_model.eval()
+id2label = seg_model.config.id2label
+
+# # DPT model: https://arxiv.org/abs/1907.01341v3
+# # "Intel/dpt-large"   "Intel/dpt-hybrid-midas"   "Intel/dpt-swinv2-tiny-256"
+# dpt_model_name = "Intel/dpt-hybrid-midas"
+# dpt_processor = AutoProcessor.from_pretrained(dpt_model_name)
+# dpt_model = AutoModelForDepthEstimation.from_pretrained(dpt_model_name).to(device)
+# dpt_model.eval()
 
 # Depth Anything pipeline: https://depth-anything.github.io/ https://depth-anything-v2.github.io/ https://promptda.github.io/ 
 # "depth-anything/Depth-Anything-V2-Small-hf"   "LiheYoung/depth-anything-small-hf"     (Small/Base/Large)
@@ -29,14 +37,6 @@ depth_anything_model_name = "depth-anything/Depth-Anything-V2-Base-hf"
 depth_anything_pipe = pipeline("depth-estimation", model=depth_anything_model_name, device=0 if torch.cuda.is_available() else -1)
 
 # UniDepth: https://github.com/lpiccinelli-eth/UniDepth
-
-# SegFormer: https://arxiv.org/abs/2105.15203 
-# "nvidia/segformer-b5-finetuned-ade-640-640"   "nvidia/segformer-b2-finetuned-ade-512-512"     "nvidia/segformer-b1-finetuned-ade-512-512"     "nvidia/segformer-b0-finetuned-ade-512-512"
-seg_model_name = "nvidia/segformer-b1-finetuned-ade-512-512"
-seg_extractor = SegformerFeatureExtractor.from_pretrained(seg_model_name)
-seg_model = SegformerForSemanticSegmentation.from_pretrained(seg_model_name).to(device)
-seg_model.eval()
-id2label = seg_model.config.id2label
 
 ADE20K_COLORS = np.array([
     [120, 120, 120], [180, 120, 120], [6, 230, 230], [80, 50, 50], [4, 200, 3],
