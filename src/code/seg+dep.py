@@ -40,10 +40,10 @@ depth_anything_pipe = pipeline("depth-estimation", model=depth_anything_model_na
 # UniDepth: https://github.com/lpiccinelli-eth/UniDepth
 
 # Image files
-png_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.png"))
-PNG_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.PNG"))
-jpeg_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.jpeg"))
-JPG_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/images/*.JPG"))
+png_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/src/images/*.png"))
+PNG_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/src/images/*.PNG"))
+jpeg_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/src/images/*.jpeg"))
+JPG_files = sorted(glob.glob("/home/kevin-zhou/Desktop/UMich/WeilandLab/Adaptive-Visual-Aid-CV/src/images/*.JPG"))
 # image_files = PNG_files + png_files + jpeg_files
 image_files = JPG_files
 
