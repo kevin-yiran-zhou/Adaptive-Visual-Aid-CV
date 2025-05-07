@@ -19,7 +19,7 @@ print("Using device:", device)
 
 # SegFormer: https://arxiv.org/abs/2105.15203 
 # "nvidia/segformer-b5-finetuned-ade-640-640"   "nvidia/segformer-b(0-4)-finetuned-ade-512-512"
-seg_model_name = "nvidia/segformer-b3-finetuned-ade-512-512"
+seg_model_name = "nvidia/segformer-b0-finetuned-ade-512-512"
 seg_extractor = SegformerFeatureExtractor.from_pretrained(seg_model_name)
 seg_model = SegformerForSemanticSegmentation.from_pretrained(seg_model_name).to(device)
 seg_model.eval()
